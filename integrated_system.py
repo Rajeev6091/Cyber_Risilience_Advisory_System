@@ -1,6 +1,7 @@
 #source venv/bin/activate
 
 import os
+import re
 import time
 import pandas as pd
 import torch
@@ -11,7 +12,8 @@ from dotenv import load_dotenv
 
 # Import components from your existing files
 from app import (
-    Config, RAGApplication, MetricsTracker, TemperatureLevel
+    Config, RAGApplication, MetricsTracker, TemperatureLevel,
+    HYBRID_METRIC_FIELDS, GRADIO_MAJOR, launch_app
 )
 # from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -23,6 +25,15 @@ load_dotenv()
 # the system runs regardless of where the repo is cloned.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
+
+# Verdict used when the RAG response contains no readable classification.
+UNKNOWN_PROFILE = "unknown"
+PROFILE_MARKER = "Profile Analysis: Majority of retrieved documents are from"
+# Label order used by llm_finetune_project/train_finetune.py.
+TRAINING_ID2LABEL = {0: "bad", 1: "good", 2: "excellent"}
+VALID_PROFILES = frozenset(TRAINING_ID2LABEL.values())
+PROFILE_PATTERN = re.compile(r"\b(excellent|good|bad)\b", re.IGNORECASE)
+NEGATED_PROFILE_PATTERN = re.compile(r"\bnot\s+(excellent|good|bad)\b", re.IGNORECASE)
 
 class IntegratedCyberSecuritySystem:
     """
@@ -53,7 +64,18 @@ class IntegratedCyberSecuritySystem:
             self.bert_model.to(self.device)
             self.bert_model.eval()
 
-            self.id2label = {0: "bad", 1: "good", 2: "excellent"}
+            # Prefer the mapping saved with the model, so a retrain that uses a
+            # different label order cannot silently mislabel every prediction.
+            # Older checkpoints saved placeholder names (LABEL_0, LABEL_1, ...);
+            # fall back to the training order for those.
+            self.id2label = dict(TRAINING_ID2LABEL)
+            saved = getattr(self.bert_model.config, "id2label", None) or {}
+            saved = {int(k): str(v).lower() for k, v in saved.items()}
+            if saved and all(v in VALID_PROFILES for v in saved.values()):
+                self.id2label = saved
+            else:
+                print(f"Model config has no usable labels ({sorted(saved.values())}); "
+                      f"assuming training order {TRAINING_ID2LABEL}")
             print("BERT model loaded successfully")
         except Exception as e:
             print(f"Error loading BERT model: {e}")
@@ -64,7 +86,10 @@ class IntegratedCyberSecuritySystem:
         # Set up metrics tracking
         self.metrics_file = os.getenv('HYBRID_METRICS_FILE',
                                      os.path.join(OUTPUT_DIR, "hybrid_metrics.csv"))
-        self.metrics_tracker = MetricsTracker(self.metrics_file)
+        # The hybrid system records BERT/RAG agreement fields the RAG schema
+        # has no columns for, so it declares its own.
+        self.metrics_tracker = MetricsTracker(self.metrics_file,
+                                              fields=HYBRID_METRIC_FIELDS)
         
         # Query counter for tracking
         self.query_counter = 0
@@ -198,6 +223,31 @@ class IntegratedCyberSecuritySystem:
             
             return f"❌ Error in BERT classification: {str(e)}"
     
+    @staticmethod
+    def _extract_majority_profile(rag_response: str) -> str:
+        """Read the RAG verdict out of a response.
+
+        Returns UNKNOWN_PROFILE when no verdict can be found. Defaulting to a
+        real rating here would report a parse failure as an assessment.
+        """
+        text = rag_response or ""
+
+        if PROFILE_MARKER in text:
+            label = text.split(PROFILE_MARKER, 1)[1].split("profiles", 1)[0]
+            match = PROFILE_PATTERN.search(label)
+            if match:
+                return match.group(1).lower()
+
+        # Drop "not excellent" and friends so a negation cannot be read as the
+        # verdict it denies, then take the last rating mentioned: the model
+        # states its conclusion after any discussion of the alternatives.
+        cleaned = NEGATED_PROFILE_PATTERN.sub(" ", text)
+        matches = PROFILE_PATTERN.findall(cleaned)
+        if matches:
+            return matches[-1].lower()
+
+        return UNKNOWN_PROFILE
+
     def hybrid_classification(self, query: str, model_name: str, temp_level: str, 
                              noise_level: float, context_chunks: int, method: str = "hybrid") -> str:
         """
@@ -250,20 +300,9 @@ class IntegratedCyberSecuritySystem:
             rag_response = self.rag_app.get_response(query, model_name, temp_level, noise_level, context_chunks)
             
             # Extract majority profile from RAG response
-            # This is a simplified approach - you might need to improve it
-            if "Profile Analysis: Majority of retrieved documents are from" in rag_response:
-                profile_part = rag_response.split("Profile Analysis: Majority of retrieved documents are from")[1]
-                majority_profile = profile_part.split("profiles")[0].strip()
-            else:
-                # Try to determine from the response text
-                if "excellent" in rag_response.lower():
-                    majority_profile = "excellent"
-                elif "good" in rag_response.lower():
-                    majority_profile = "good"
-                else:
-                    majority_profile = "bad"
-            
-            metrics_data["rag_majority_profile"] = majority_profile.lower()
+            majority_profile = self._extract_majority_profile(rag_response)
+
+            metrics_data["rag_majority_profile"] = majority_profile
             
             # If using RAG-only method, return early
             if method.lower() == "rag":
@@ -273,12 +312,17 @@ class IntegratedCyberSecuritySystem:
                 return rag_response
             
             # For hybrid method, combine both approaches
-            # Determine if BERT and RAG agree
-            agreement = bert_class.lower() == majority_profile.lower()
+            # Determine if BERT and RAG agree. An unreadable RAG verdict is not
+            # agreement with anything, and must never become the final answer.
+            rag_usable = majority_profile != UNKNOWN_PROFILE
+            agreement = rag_usable and bert_class.lower() == majority_profile
             metrics_data["agreement"] = agreement
-            
+
             # Determine final classification with a weighted approach
-            if bert_confidence > 0.8:
+            if not rag_usable:
+                final_class = bert_class
+                confidence_note = "RAG verdict could not be read, using BERT classification"
+            elif bert_confidence > 0.8:
                 # High confidence BERT prediction takes precedence
                 final_class = bert_class
                 confidence_note = "High BERT confidence, using BERT classification"
@@ -289,7 +333,7 @@ class IntegratedCyberSecuritySystem:
             else:
                 # If disagreement, use weighted decision
                 if bert_confidence < 0.6:
-                    final_class = majority_profile.lower()
+                    final_class = majority_profile
                     confidence_note = "Low BERT confidence, using RAG classification"
                 else:
                     final_class = bert_class
@@ -536,7 +580,15 @@ def create_gradio_interface(integrated_system: IntegratedCyberSecuritySystem):
     #footer-note { text-align: center; opacity: 0.65; font-size: 0.85rem; margin-top: 18px; }
     """
 
-    with gr.Blocks(theme=theme, css=custom_css, title="Cyber Resilience Assessment") as demo:
+    # Gradio 6 ignores theme/css passed here; launch_app() applies them instead.
+    blocks_kwargs = {"title": "Cyber Resilience Assessment"}
+    launch_style = {}
+    if GRADIO_MAJOR >= 6:
+        launch_style = {"theme": theme, "css": custom_css}
+    else:
+        blocks_kwargs.update(theme=theme, css=custom_css)
+
+    with gr.Blocks(**blocks_kwargs) as demo:
         with gr.Row(elem_id="hero"):
             gr.HTML(
                 """
@@ -785,7 +837,8 @@ def create_gradio_interface(integrated_system: IntegratedCyberSecuritySystem):
             inputs=[],
             outputs=[analytics_output]
         )
-        
+
+    demo.launch_style = launch_style
     return demo
 
 if __name__ == "__main__":
@@ -796,4 +849,4 @@ if __name__ == "__main__":
     demo = create_gradio_interface(integrated_system)
     
     print("Launching interface...")
-    demo.launch(share=True)
+    launch_app(demo)

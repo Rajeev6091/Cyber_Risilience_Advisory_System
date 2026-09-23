@@ -135,8 +135,22 @@ Launch the integrated system (starts the Gradio web interface):
 python3 integrated_system.py
 ```
 
-The UI is served at **http://127.0.0.1:7860**. First startup takes a while: it parses the
-PDFs, builds the FAISS index and loads the BERT weights.
+The UI is served at **http://127.0.0.1:7860** and is reachable only from this machine.
+First startup takes a while: it parses the PDFs, builds the FAISS index and loads the
+BERT weights.
+
+### Exposing the UI publicly
+
+Sharing creates a `*.gradio.live` URL that anyone on the internet can open, and every query
+it receives spends your API credits. Sharing is therefore opt-in and requires credentials —
+the app refuses to start a public link without them:
+
+```bash
+GRADIO_SHARE=1 GRADIO_USER=someone GRADIO_PASSWORD=a-strong-password python3 integrated_system.py
+```
+
+`GRADIO_USER` / `GRADIO_PASSWORD` may also be set on their own to password-protect the
+local UI.
 
 The RAG-only system can also be run on its own:
 
@@ -169,7 +183,9 @@ python3 app.py
 | **Vector store errors** | Delete `vectorstore_openai/` / `vectorstore_gemini/` and let the system rebuild them. |
 | **Memory issues** | Reduce the `context_chunks` parameter for large documents. |
 | **`OMP: Error #15: Initializing libomp.dylib…`** (macOS crash) | Two OpenMP runtimes are linked in by PyTorch and FAISS. Run with `KMP_DUPLICATE_LIB_OK=TRUE` as a stopgap, or install `faiss-cpu` and `torch` from the same channel to resolve it properly. |
-| **Gradio theme/CSS not applied** | Gradio 6 moved `theme` and `css` from the `gr.Blocks()` constructor to `launch()`. |
+| **"Refusing to open a public link without authentication"** | `GRADIO_SHARE` is set but `GRADIO_USER`/`GRADIO_PASSWORD` are not. Set both, or unset `GRADIO_SHARE` to run locally. |
+| **"Metrics header mismatch; previous file archived as …"** | The metrics file on disk used an older column set. The old data was kept under a timestamped name and a new file started; nothing was lost. |
+| **Model config has no usable labels** | The saved model stores placeholder names (`LABEL_0`…). The app falls back to the training order `bad / good / excellent`. Re-save the model with `id2label` set to silence it. |
 
 ## 🔭 Future Improvements
 

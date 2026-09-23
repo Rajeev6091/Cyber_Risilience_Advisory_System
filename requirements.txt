@@ -27,7 +27,10 @@ langchain-google-genai==1.0.10
 langchain-mistralai==0.1.12
 langchain-anthropic==0.1.23
 faiss-cpu
-gradio
+# Bounded: Gradio 6 moved `theme`/`css` off the Blocks constructor. The code
+# handles both majors, but an unbounded install could pick up a 7.x that does
+# not.
+gradio>=5,<7
 tiktoken
 python-dotenv
 pypdf
@@ -37,3 +40,12 @@ numpy
 # BERT classification (used by integrated_system.py)
 torch
 transformers
+
+# Fine-tuning and evaluation (llm_finetune_project/)
+peft
+scikit-learn
+matplotlib
+seaborn
+
+# PDF text extraction (scripts/create_json.py)
+pdfplumber

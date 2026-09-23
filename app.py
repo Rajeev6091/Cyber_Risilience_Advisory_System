@@ -32,86 +32,174 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
 
+# Gradio 6 moved `theme` and `css` off the Blocks constructor onto launch().
+GRADIO_MAJOR = int(gr.__version__.split(".")[0])
+
+
+def launch_app(demo, **kwargs):
+    """Launch a Gradio UI, private to this machine unless told otherwise.
+
+    share=True publishes a *.gradio.live URL that anyone on the internet can
+    reach. This app holds no session state and spends real API credits on
+    every query, so sharing is opt-in and must carry credentials:
+
+        GRADIO_SHARE=1 GRADIO_USER=me GRADIO_PASSWORD=secret python3 app.py
+    """
+    share = os.getenv("GRADIO_SHARE", "").strip().lower() in ("1", "true", "yes", "on")
+    user = os.getenv("GRADIO_USER")
+    password = os.getenv("GRADIO_PASSWORD")
+    auth = (user, password) if user and password else None
+
+    if share and auth is None:
+        raise SystemExit(
+            "Refusing to open a public link without authentication: anyone with "
+            "the URL could spend your API credits. Set GRADIO_USER and "
+            "GRADIO_PASSWORD, or unset GRADIO_SHARE to run locally."
+        )
+
+    # Styling the Blocks constructor could not accept on this Gradio version.
+    kwargs.update(getattr(demo, "launch_style", {}))
+
+    if share:
+        print("Launching with a PUBLIC share link (authentication enabled).")
+    else:
+        print("Launching locally on http://127.0.0.1:7860 "
+              "(set GRADIO_SHARE=1 with GRADIO_USER/GRADIO_PASSWORD to share).")
+
+    return demo.launch(share=share, auth=auth, **kwargs)
+
+
+# Declared type of every metric either tracker can write. A field absent from
+# this map is treated as free text.
+METRIC_TYPES = {
+    # RAG metrics
+    "query_id": str,
+    "query_text": str,
+    "temperature": (int, float),
+    "context_chunks": int,
+    "retrieval_time_ms": (int, float),
+    "total_time_ms": (int, float),
+    "num_retrieved_docs": int,
+    "sources_list": str,
+    "llm_response": str,
+    "token_count": int,
+    "query_doc_euclidean_dist": (int, float),
+    "precision_at_k": (int, float, str),
+    "recall_at_k": (int, float, str),
+    "mrr": (int, float, str),
+    "groundedness_score": (int, float, str),
+    "source_profile_counts": str,
+    # Hybrid (RAG + BERT) metrics
+    "timestamp": str,
+    "method": str,
+    "bert_classification": str,
+    "bert_confidence": (int, float),
+    "rag_majority_profile": str,
+    "agreement": bool,
+    "final_classification": str,
+    "error": str,
+}
+
+RAG_METRIC_FIELDS = [
+    "query_id", "query_text", "temperature", "context_chunks",
+    "retrieval_time_ms", "total_time_ms", "num_retrieved_docs",
+    "sources_list", "llm_response", "token_count",
+    "query_doc_euclidean_dist", "precision_at_k", "recall_at_k",
+    "mrr", "groundedness_score", "source_profile_counts",
+]
+
+HYBRID_METRIC_FIELDS = [
+    "timestamp", "query_id", "query_text", "method",
+    "bert_classification", "bert_confidence", "rag_majority_profile",
+    "agreement", "final_classification", "total_time_ms", "error",
+]
+
+
+def _as_tuple(expected_type):
+    return expected_type if isinstance(expected_type, tuple) else (expected_type,)
+
+
+def _default_for(expected_type):
+    """Value to record when a metric is missing."""
+    primary = _as_tuple(expected_type)[0]
+    if primary is str:
+        return ""
+    if primary is bool:
+        return False
+    return 0
+
+
+def _coerce(value, expected_type):
+    """Return value as one of expected_type, or the field's default."""
+    types = _as_tuple(expected_type)
+    # bool is a subclass of int, so only accept it where it is actually wanted.
+    if isinstance(value, types) and not (isinstance(value, bool) and bool not in types):
+        return value
+    try:
+        if bool in types:
+            return bool(value)
+        if int in types and float not in types:
+            return int(float(value))
+        if float in types:
+            return float(value)
+        return str(value)
+    except (ValueError, TypeError):
+        return _default_for(expected_type)
+
+
 class MetricsTracker:
-    def __init__(self, metrics_file=os.path.join(OUTPUT_DIR, "rag_metrics.csv")):
+    def __init__(self, metrics_file=os.path.join(OUTPUT_DIR, "rag_metrics.csv"), fields=None):
         self.metrics_file = metrics_file
+        # Each tracker owns the exact column set it writes, so rows can never be
+        # appended against a header belonging to a different schema.
+        self.fields = list(fields) if fields else list(RAG_METRIC_FIELDS)
         # Make sure the output directory exists before writing
         os.makedirs(os.path.dirname(os.path.abspath(metrics_file)), exist_ok=True)
-        # Create metrics file with headers if it doesn't exist
-        if not os.path.exists(metrics_file):
-            headers = [
-                "query_id", "query_text", "temperature", "context_chunks", 
-                "retrieval_time_ms", "total_time_ms", "num_retrieved_docs", 
-                "sources_list", "llm_response", "token_count", 
-                "query_doc_euclidean_dist", "precision_at_k", "recall_at_k", 
-                "mrr", "groundedness_score", "source_profile_counts"
-            ]
-            pd.DataFrame(columns=headers).to_csv(metrics_file, index=False)
-    
+        self._ensure_header()
+
+    def _ensure_header(self):
+        """Create the file, or set aside one whose header is a different schema."""
+        if not os.path.exists(self.metrics_file):
+            pd.DataFrame(columns=self.fields).to_csv(self.metrics_file, index=False)
+            return
+        try:
+            existing = pd.read_csv(self.metrics_file, nrows=0).columns.tolist()
+        except Exception:
+            existing = []
+        if existing == self.fields:
+            return
+        # Appending to a mismatched header silently shifts every column, so keep
+        # the old data under a timestamped name and start a correct file.
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        root, ext = os.path.splitext(self.metrics_file)
+        archived = f"{root}.{stamp}.bak{ext}"
+        os.rename(self.metrics_file, archived)
+        print(f"Metrics header mismatch; previous file archived as {archived}")
+        pd.DataFrame(columns=self.fields).to_csv(self.metrics_file, index=False)
+
     def log_metrics(self, metrics_data: Dict[str, Any]):
         """Log metrics to CSV file with validation"""
         try:
-            # Define expected types for each metric
-            metric_types = {
-                "query_id": str,
-                "query_text": str,
-                "temperature": (int, float),
-                "context_chunks": int,
-                "retrieval_time_ms": (int, float),
-                "total_time_ms": (int, float),
-                "num_retrieved_docs": int,
-                "sources_list": str,
-                "llm_response": str,
-                "token_count": int,
-                "query_doc_euclidean_dist": (int, float),
-                "precision_at_k": (int, float, str),
-                "recall_at_k": (int, float, str),
-                "mrr": (int, float, str),
-                "groundedness_score": (int, float, str),
-                "source_profile_counts": str
-            }
-            
-            # Validate and clean each metric
-            cleaned_metrics = {}
-            for metric, expected_type in metric_types.items():
-                value = metrics_data.get(metric)
-                
-                # Handle missing values
-                if value is None:
-                    if expected_type == str:
-                        cleaned_metrics[metric] = ""
-                    elif expected_type in (int, float):
-                        cleaned_metrics[metric] = 0
-                    continue
-                
-                # Validate type
-                if isinstance(value, expected_type) or (
-                    isinstance(expected_type, tuple) and 
-                    any(isinstance(value, t) for t in expected_type)
-                ):
-                    cleaned_metrics[metric] = value
-                else:
-                    # Try to convert to correct type
-                    try:
-                        if expected_type == int or (isinstance(expected_type, tuple) and int in expected_type):
-                            cleaned_metrics[metric] = int(float(value))
-                        elif expected_type == float or (isinstance(expected_type, tuple) and float in expected_type):
-                            cleaned_metrics[metric] = float(value)
-                        else:
-                            cleaned_metrics[metric] = str(value)
-                    except (ValueError, TypeError):
-                        cleaned_metrics[metric] = "" if expected_type == str else 0
-            
-            # Log the cleaned metrics
-            df = pd.DataFrame([cleaned_metrics])
-            if os.path.exists(self.metrics_file):
-                df.to_csv(self.metrics_file, mode='a', header=False, index=False)
-            else:
-                df.to_csv(self.metrics_file, index=False)
-            
+            row = {}
+            for field in self.fields:
+                expected_type = METRIC_TYPES.get(field, str)
+                value = metrics_data.get(field)
+                row[field] = (
+                    _default_for(expected_type) if value is None
+                    else _coerce(value, expected_type)
+                )
+
+            dropped = [k for k in metrics_data if k not in self.fields]
+            if dropped:
+                print(f"Warning: metrics not in this tracker's schema, not logged: {sorted(dropped)}")
+
+            # columns= pins the order to the header written by _ensure_header().
+            df = pd.DataFrame([row], columns=self.fields)
+            df.to_csv(self.metrics_file, mode='a', header=False, index=False)
+
             print(f"Metrics logged successfully to {self.metrics_file}")
             return True
-            
+
         except Exception as e:
             print(f"Error logging metrics: {str(e)}")
             return False
@@ -270,6 +358,9 @@ class VectorStoreManager:
             if os.path.exists(store_path):
                 try:
                     print(f"Loading existing {embedding_type} vector store...")
+                    # Unpickles the index. Safe only because this store is built
+                    # locally from pdfs/ by this app; never point store_path at a
+                    # downloaded or third-party index.
                     vector_store = FAISS.load_local(
                         store_path, 
                         embeddings,
@@ -893,4 +984,4 @@ def create_gradio_interface(rag_app: RAGApplication):
 if __name__ == "__main__":
     rag_app = RAGApplication()
     demo = create_gradio_interface(rag_app)
-    demo.launch(share=True)
+    launch_app(demo)
