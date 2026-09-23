@@ -1,0 +1,39 @@
+# langchain
+# ipykernel
+# python-dotenv
+# langchain_community
+# pypdf
+# pymupdf
+# bs4
+# langchain-text-splitters
+# langchain-openai
+# chromadb
+# langchain-ollama
+# sentence-transformers
+# langchain-huggingface
+# faiss-cpu
+# pinecone
+# gradio
+# langchain-google-genai
+
+# Requires Python 3.11 or 3.12 (the pinned langchain/protobuf stack is not
+# compatible with Python 3.14).
+
+langchain==0.2.14
+langchain-core==0.2.36
+langchain-community==0.2.12
+langchain-openai==0.1.22
+langchain-google-genai==1.0.10
+langchain-mistralai==0.1.12
+langchain-anthropic==0.1.23
+faiss-cpu
+gradio
+tiktoken
+python-dotenv
+pypdf
+pandas
+numpy
+
+# BERT classification (used by integrated_system.py)
+torch
+transformers

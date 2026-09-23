@@ -1,0 +1,247 @@
+input,label
+Stakeholders do not understand fallback procedures because they have never walked through a scenario in a TTX environment.,bad
+"Scenarios used in rare TTX attempts are unrealistic and unrelated to organisational risks, resulting in no meaningful insights.",bad
+No continuous assurance testing exists. Systems operate without regular control validation. Vulnerabilities remain unknown until exploited.,bad
+"Detection controls are outdated, producing irrelevant alerts while missing true critical events. No one tests or tunes them.",bad
+"Recovery procedures have not been tested in years. Controls may have drifted, and no one knows if the organisation can respond effectively.",bad
+Tools like vulnerability scanners and monitoring agents are deployed but never configured or used. Assurance testing is essentially nonexistent.,bad
+Backups are taken but never verified. Integrity issues remain undetected until recovery is attempted during incidents.,bad
+"No process exists to test recovery workflows after changes. System updates break controls, but the organisation remains unaware.",bad
+"Escalation paths and alert rules are not tested. Detection failures persist without correction, delaying incident response.",bad
+Assurance testing is treated as optional. Controls degraded over time due to configuration drift and lack of maintenance.,bad
+Critical vulnerabilities persist for years because continuous testing is never performed. Weak security controls put business continuity at risk.,bad
+The organisation has no proactive approach to uncovering weaknesses. Response and recovery fail because issues are detected too late.,bad
+No Red or Blue Team testing is conducted. Controls remain unvalidated and vulnerabilities go undetected for long periods.,bad
+"The organisation has never undergone STAR, CREST, CBEST or GBEST assessments, even for critical services.",bad
+"Red Team findings are ignored or not remediated. As a result, weaknesses remain exploitable for years.",bad
+Blue Team is not trained to handle simulated attacks. No monitoring or detection tuning happens after exercises.,bad
+AI-based detection tools are never tested for adversarial bypass. Attackers can fool the models without resistance.,bad
+"Red Team testing is performed only superficially with generic scripts, providing no real insight into threats.",bad
+"External Red Team exercises are cancelled due to budget constraints, leaving high-risk systems untested.",bad
+"Red Team simulations reveal major weaknesses, but there is no process to track or fix them.",bad
+Blue Team cannot detect even basic simulated attacks. Escalation paths and monitoring rules are completely broken.,bad
+"There is no planning or strategy for adversarial AI testing, leaving AI models vulnerable to manipulation.",bad
+Recovery processes are outdated and not based on any recognised industry best practice.,bad
+There is no continuous assurance testing; controls fail silently without detection.,bad
+Runbooks and playbooks have not been updated for years and are irrelevant to current threats.,bad
+Industry standards such as NIST or ISO are ignored during recovery planning and testing.,bad
+"TTX and recovery exercises are never conducted, leaving gaps unaddressed.",bad
+Recovery metrics are non-existent or have no alignment with common industry baselines.,bad
+"Best practices are known but never implemented, resulting in inconsistent recovery workflows.",bad
+The organisation believes tools alone will accomplish recovery and ignores process-driven best practices.,bad
+Business continuity plans are not based on any industry framework and lack practical usefulness.,bad
+"No benchmarking is done against industry practices, leaving maturity levels unknown.",bad
+Recovery process gaps remain unaddressed even after being identified.,bad
+There is no structured approach to incorporate lessons learned after incidents.,bad
+Recovery communications are outdated and do not reflect current operational needs.,bad
+Gap assessments are performed but no actions are taken to resolve issues.,bad
+Runbooks and playbooks contain unresolved errors discovered during exercises.,bad
+Capability gaps remain unknown due to lack of proper post-incident analysis.,bad
+"Gaps discovered during exercises are repeatedly ignored, leading to recurring failures.",bad
+Stakeholder feedback on process weaknesses is not reviewed or implemented.,bad
+Control misconfigurations identified during testing remain unresolved for months.,bad
+There is no documented method for tracking recovery gaps or improvement actions.,bad
+"Recovery plan remains outdated despite new tools being deployed. Playbooks reference obsolete systems, making recovery execution unreliable.",bad
+New recovery technologies are introduced but no updates are made to the recovery plan. Playbooks still contain legacy steps that no longer function.,bad
+Stakeholders are unaware of changes in recovery processes because training is never updated. Plans and playbooks drift further from real operations.,bad
+"Recovery documentation has not been revised in years, causing teams to rely on improvised actions during incidents.",bad
+"Playbooks contain broken links, outdated contacts, and steps referencing retired systems. No improvement efforts are underway.",bad
+"Recovery plan improvements are never prioritised, even when major gaps are identified during exercises.",bad
+"New threat vectors and attack techniques are not reflected in recovery playbooks, leaving teams unprepared.",bad
+"Recovery steps for newly adopted cloud services are missing completely, making restoration attempts chaotic.",bad
+No mechanism exists to update or validate recovery plans. Changes in infrastructure accumulate without being reflected in playbooks.,bad
+"Recovery training is not aligned with actual tools or processes, resulting in confusion and repeated failures during exercises.",bad
+"No formal recovery training sessions exist. Stakeholders have never been instructed on procedures, tools, or escalation paths. Skills remain inconsistent and untested.",bad
+Training is provided only after major failures. Stakeholders lack proactive learning and are unable to follow recovery procedures correctly.,bad
+"The organisation has no cyber recovery education plan. Webinars, workshops, and seminars are not conducted. Teams rely on outdated knowledge.",bad
+Stakeholders are unaware of recovery handling protocols because training has not occurred for years. Knowledge gaps increase operational risks.,bad
+"Training materials are obsolete, referencing tools no longer in use. Stakeholders are confused during exercises and unable to execute recovery tasks.",bad
+"No skills-enhancement initiatives exist. Managers assume staff already know procedures, but interviews show the opposite.",bad
+Webinars and seminars are promised but never delivered. Recovery readiness drops significantly due to lack of education.,bad
+Stakeholders avoid participating in sessions because training is optional and poorly structured. Skill levels vary widely across teams.,bad
+"New employees receive no onboarding related to recovery processes, leading to repeated mistakes during recovery attempts.",bad
+"There is no mechanism to evaluate or enhance recovery skills. Training gaps accumulate, making real-world recovery ineffective.",bad
+Staff receive no formal training about recovery controls. Most are unaware of their responsibilities during a cyber incident.,bad
+"No educational materials exist. Staff do not understand how backups, restores, or escalation processes work.",bad
+Employees rely on outdated assumptions and tribal knowledge because the organisation provides no structured recovery training.,bad
+Training is only provided reactively after incidents. Staff remain unprepared during real recovery scenarios.,bad
+"No one knows the steps required to support recovery activities, creating confusion and delays during disruptions.",bad
+"Recovery controls are technology-dependent, and staff are never trained on their proper usage. As a result, operations fail easily.",bad
+"Knowledge gaps persist across departments because no recovery guidance, workshops, or briefings are offered.",bad
+Employees have never participated in recovery simulations. They struggle to assist technical teams during crises.,bad
+"Staff misunderstand recovery communications and escalate issues incorrectly, worsening delays.",bad
+"A lack of training results in staff being unable to recognise when recovery procedures should be initiated, making the organisation vulnerable.",bad
+Organisation lacks any formal recovery call-off contract. Dependence on ad-hoc support results in prolonged outages during cyber incidents.,bad
+"No external service provider is available for recovery tasks, leading to unmanaged restoration efforts and chaotic response behaviour.",bad
+"Company relies on outdated informal agreements instead of structured recovery contracts, causing unpredictable vendor involvement.",bad
+Organisation has no professional cyber-recovery partner; internal teams handle incidents without expertise or specialised tools.,bad
+"Recovery outsourcing is entirely absent, leaving the organisation unable to address large-scale or multi-system failures.",bad
+"No contracts exist for external support during ransomware or data corruption events, resulting in extreme recovery delays.",bad
+Business never engaged any specialist recovery provider. Complex incidents escalate beyond internal capabilities.,bad
+Dependency on third-party IT vendors without a recovery contract causes misaligned expectations and improper escalation.,bad
+Organisation frequently struggles to recover because no external recovery specialists are contracted or pre-vetted.,bad
+"Absence of formalised recovery call-off agreements causes confusion, finger-pointing, and unmanaged restoration timelines.",bad
+"Lessons learned from TTX exercises influence annual strategy, investment planning, and capability development, creating a culture of continuous improvement.",excellent
+"All TTX sessions are documented using digital platforms, enabling analytics on stakeholder readiness, communication efficiency, and decision-making quality across exercises.",excellent
+"Continuous assurance testing is fully automated and integrated across all systems. Vulnerability data, control health, and monitoring accuracy are evaluated in real time.",excellent
+"Advanced tools like NMAP, OpenVAS, ZAP, and Nessus are orchestrated together to continuously probe systems. Recovery controls adjust dynamically based on findings.",excellent
+Backup integrity is validated automatically every night. Restores are simulated in isolated environments to ensure immediate recoverability.,excellent
+Detection controls undergo real-time functional testing to ensure alerts fire correctly. False positives are auto-tuned and escalations verified end-to-end.,excellent
+Configuration drift is monitored through automated compliance tools. Any deviation triggers both security alerting and recovery document updates.,excellent
+"Continuous threat emulation tools simulate real adversarial behaviour, validating readiness and recovery robustness against modern TTPs.",excellent
+"Every change in infrastructure triggers automatic assurance testing workflows, ensuring controls remain current and effective.",excellent
+"Continuous assurance testing dashboards provide leadership with real-time resilience metrics covering detection, response, and recovery.",excellent
+"Patch validation is automated—new patches are tested, applied, verified, and logged, ensuring zero-delay vulnerability management.",excellent
+"A comprehensive continuous testing regime ensures the organisation detects, responds, and recovers faster than industry benchmarks, with full alignment between controls, processes, and actual operations.",excellent
+"Full-spectrum Red and Blue Team exercises are conducted using STAR, CREST, CBEST and GBEST frameworks with deep threat intelligence integration.",excellent
+"AI Red Teaming is implemented to test adversarial attacks against ML-based defences, ensuring models are hardened continuously.",excellent
+"Red Teams simulate nation-state level tactics, techniques and procedures. Blue Teams respond using real-time detection, isolation, and recovery workflows.",excellent
+CBEST-style assessments leverage financial-sector threat intelligence to test critical infrastructure under realistic attack scenarios.,excellent
+"Blue Team exercises validate playbooks, escalation paths and automated containment capabilities with near-zero failure rates.",excellent
+AI-driven penetration tools generate adaptive attacks that evolve during the test. Defence models adapt automatically to mitigate threats.,excellent
+"High-value assets undergo continuous, intelligence-led adversarial testing. All findings automatically feed into remediation pipelines.",excellent
+Red and Blue exercises are fully integrated into resilience planning. Leadership receives detailed reports and timelines for every mitigation.,excellent
+GBEST and STAR frameworks are used to design advanced scenarios that test both technical and procedural readiness.,excellent
+"The organisation maintains a mature adversarial testing program combining human Red Teams, automated attack platforms, and AI-driven simulations to ensure continuous resilience.",excellent
+"The organisation consistently integrates NIST, ISO, ENISA and sector-specific best practices into all recovery processes.",excellent
+"Continuous assurance testing is automated, rigorous and aligned with leading global frameworks.",excellent
+"Runbooks, playbooks and COOP plans are updated dynamically based on industry trends, new threats and global advisories.",excellent
+"Recovery maturity is benchmarked against top-tier organisations, ensuring world-class preparedness.",excellent
+"Recovery TTX and simulation programs follow advanced, multi-layered industry and regulatory scenarios.",excellent
+Metrics and KPIs reflect internationally accepted resilience benchmarks and are monitored continuously.,excellent
+"Processes, people and technologies work together following structured best-practice models, ensuring rapid recovery.",excellent
+"Industry guidelines are deeply embedded in the organisation’s culture, influencing every resilience decision.",excellent
+"Best-practice frameworks drive proactive updates to detection, response and recovery capabilities.",excellent
+"The organisation demonstrates a highly mature, continuously evolving recovery model fully aligned with global best practices.",excellent
+"All recovery process, control and capability gaps are documented, prioritised and swiftly resolved.",excellent
+Lessons learned are integrated into recovery materials immediately after each exercise or incident.,excellent
+"Recovery communications, escalation paths and coordination plans are continuously refined to close gaps.",excellent
+Gap mitigation actions follow a structured improvement lifecycle with clear owners and deadlines.,excellent
+Every gap identified during testing or operations leads to measurable process improvements.,excellent
+Runbooks and playbooks evolve dynamically based on continuous analysis of failures and weak points.,excellent
+"Capabilities are improved proactively, preventing gaps from reappearing across future exercises.",excellent
+Gap remediation is validated through repeated testing to ensure long-term effectiveness.,excellent
+The organisation maintains a comprehensive gap register with full transparency and accountability.,excellent
+Post-recovery improvements consistently elevate resilience maturity and reduce future recovery risks.,excellent
+"Recovery plans and playbooks are dynamically updated with every major change in infrastructure, tools, and threat landscape. Updates follow an automated workflow ensuring no step becomes outdated.",excellent
+"Playbooks are deeply integrated with orchestration and monitoring tools, automatically adapting to new capabilities and workflows. Updates are validated through regular simulations.",excellent
+Every new recovery technique or tool triggers immediate updates to the plan. Stakeholders receive tailored training modules aligned with the updated playbooks.,excellent
+"Recovery documentation includes version control, detailed change logs, and automated validation checks. Playbooks evolve continuously based on threat intel, exercises, and real-world incidents.",excellent
+"The organisation maintains highly detailed, role-based playbooks that adapt to new recovery technologies. Training is adaptive and ensures all teams stay aligned with changes.",excellent
+"Recovery plans incorporate structured scenario-based improvements. Each update enhances clarity, reduces downtime, and strengthens confidence in recovery execution.",excellent
+"Playbook improvements are driven by analytics from past exercises, real attack patterns, and operational telemetry. All improvements are tested via automated drills.",excellent
+Recovery plans incorporate future-proofing measures and support hybrid infrastructure. Playbooks reflect real-time system dependencies and dynamic workflows.,excellent
+"Stakeholders receive continuous learning updates aligned to every major playbook improvement, ensuring operational excellence across the entire recovery lifecycle.",excellent
+"Recovery tools, processes, and playbooks follow a continuous improvement loop where enhancements are validated, documented, communicated, and trained swiftly and consistently.",excellent
+"The organisation runs a comprehensive cyber recovery training program, including hands-on labs, simulations, webinars, certifications, and role-based workshops. Stakeholders maintain exceptional readiness.",excellent
+"Training is continuous and adaptive, automatically updated with every change in the recovery environment. All stakeholders undergo mandatory assessments to ensure mastery.",excellent
+"Stakeholders participate in scenario-based recovery drills using realistic simulations. Training deepens understanding of decision-making, technical execution, and communication flows.",excellent
+Recovery training is integrated into daily operations. AI-driven modules personalise learning paths and track competency levels across teams.,excellent
+"The organisation offers advanced workshops covering ransomware recovery, cloud failover, forensic recovery steps, and cross-team collaboration. Skills improve rapidly.",excellent
+Annual cyber resilience bootcamps complement monthly micro-trainings. Stakeholders develop expert-level understanding of restoration workflows and toolsets.,excellent
+"Training incorporates lessons learned from global incidents, enabling stakeholders to refine strategies based on emerging attack patterns.",excellent
+Stakeholders undergo certification-based programs tied to industry frameworks. Training outcomes directly improve recovery reliability and speed.,excellent
+"Role-based training ensures each stakeholder—technical, managerial, operational—understands their responsibilities during recovery. Simulations validate skill proficiency.",excellent
+"Training integrates simulation platforms that automatically generate recovery exercises. Stakeholders maintain high familiarity with playbooks, tools, and escalation steps.",excellent
+"The organisation maintains a comprehensive recovery education program, ensuring all employees understand their roles in the recovery ecosystem. Training is mandatory and continuously updated.",excellent
+"Staff undergo advanced role-based recovery training, practicing real-world restoration tasks and decision-making in structured simulations.",excellent
+"Employees are taught recovery concepts through interactive workshops, scenario labs, micro-learning modules, and competency assessments.",excellent
+"Training highlights the critical role of people in recovery operations, emphasising communication, decision-making, and cooperation across teams.",excellent
+"Recovery education includes technical, procedural, and behavioural components, ensuring staff can support both technical and business-side recovery functions.",excellent
+"All staff are trained on identifying triggers for recovery activation and escalation, reducing mean time to respond and recover.",excellent
+"Training is integrated with incident management tools, enabling staff to practice workflows in realistic digital environments.",excellent
+"Employees participate in recurring drills that test their understanding of recovery controls, fallback strategies, and resilience requirements.",excellent
+"Recovery education materials include video lessons, guided walkthroughs, cross-team exercises, and post-training evaluations.",excellent
+"The organisation cultivates a recovery-first culture where staff expertise is continuously strengthened through learning programs, ensuring peak readiness during disruptions.",excellent
+"Organisation maintains a fully mature recovery call-off contract with a top-tier cyber-resilience firm offering 24/7 response, containment, forensics, and full system rebuild assistance.",excellent
+"Advanced recovery partners deliver rapid-response teams for breach containment, forensic deep-dive, and clean-room restoration.",excellent
+"Comprehensive contracts include multi-cloud recovery orchestration, backup integrity validation, and full restoration support.",excellent
+Company has a highly robust call-off contract offering proactive readiness assessments and guaranteed response SLAs.,excellent
+Organisation partners with elite cyber-recovery specialists capable of handling nation-state-grade attacks and cross-domain restoration.,excellent
+"Recovery service provider delivers continuous monitoring, rapid triage support, and guided recovery execution.",excellent
+"Contract ensures availability of specialised forensic analysts, malware experts, and recovery engineers on demand.",excellent
+Business participates in advanced joint recovery simulations conducted by contracted specialist teams to ensure readiness.,excellent
+"Recovery call-off contract includes post-incident analytics, resilience improvements, and automated restoration workflow support.",excellent
+"The organisation has a highly mature, multilayered recovery agreement ensuring seamless access to experts, tools, and structured recovery methodologies during severe cyber events.",excellent
+"Outputs from TTX exercises include scenario summaries, decision logs, and identified gaps. While TTXs help refine recovery plans, some teams struggle with role clarity.",good
+Simulated outage scenarios help highlight communication challenges between security and infrastructure teams. Recommendations are produced but require stronger enforcement.,good
+The organisation performs regular vulnerability scans using automated tools. Recovery controls are tested quarterly to ensure they remain functional. Some documentation lags behind actual changes but gaps are tracked.,good
+"Continuous assurance testing is conducted for core infrastructure. Monitoring and detection controls are verified monthly, although some non-critical systems are tested less frequently.",good
+"Teams validate recovery processes through periodic configuration reviews. Weaknesses, such as outdated firewall rules, are identified during routine assessments and remediated with moderate speed.",good
+"Automated scanning tools detect new vulnerabilities, and findings are reviewed by IT and security teams. Recovery runbooks are updated when flows change, though updates sometimes take time.",good
+Detection systems such as SIEM alerts and endpoint logs are checked regularly. Recovery teams perform functional testing of backup integrity and system readiness.,good
+"Continuous assurance testing includes patch validation, control health checks, and change verification. Some controls require manual intervention but remain effective overall.",good
+Monitoring processes are tested to ensure alerts trigger correctly. Analysts validate escalation paths and update documentation when gaps are found.,good
+Vulnerability scans and penetration-style tests identify risks in web applications and network devices. Recovery teams use findings to refine fallback and isolation procedures.,good
+"Testing includes evaluating detection accuracy, identifying false positives, and adjusting rules. Recovery controls are validated against evolving threat scenarios.",good
+Backup and restore paths are tested semi-regularly. Assurance testing identifies occasional misconfigurations that are addressed promptly.,good
+Red and Blue Team exercises are conducted periodically. STAR and CREST-style assessments are performed for critical systems to uncover control weaknesses. Findings are analysed and remediation actions are tracked to completion.,good
+"The organisation invites external CREST-certified testers annually. Blue Teams respond to simulated intrusions, helping improve detection and escalation workflows.",good
+"CBEST testing is used for high-value assets. Red Team findings lead to updates in logging, access control, and incident response procedures.",good
+Blue Team monitoring capabilities are evaluated through controlled adversarial scenarios. Gaps identified are remediated with moderate efficiency.,good
+Red Team engagements simulate realistic threat actors focused on privilege escalation. Blue Team uses findings to enhance SIEM correlation rules.,good
+STAR-style assessments validate the readiness of infrastructure and critical data flows. Some processes require manual correction but are improving.,good
+Red Team tests highlight weaknesses in MFA usage and network segmentation. Follow-up exercises show noticeable recovery process improvement.,good
+Sporadic adversarial simulations help identify misconfigurations in firewalls and EDR settings. Blue Teams update detection logic accordingly.,good
+Penetration-style Red Team testing validates the exposure of cloud resources. Identified threats are mitigated within reasonable timelines.,good
+AI defence tools are tested for adversarial bypass attempts. Defence models are patched when evasion gaps appear.,good
+"The organisation aligns its recovery processes with recognised industry best practices such as NIST, ISO 22301 and ISO 27031. Controls are reviewed periodically.",good
+Continuous assurance testing is performed regularly to validate that recovery processes remain effective and updated.,good
+Recovery runbooks are aligned with best-practice frameworks and are refreshed when new threats or technologies emerge.,good
+"Industry standards guide updates to cyber COOP and business continuity plans, ensuring processes are not outdated.",good
+"Best-practice recommendations are used to refine detection, response and recovery workflows across teams.",good
+"Recovery metrics are benchmarked against industry norms, helping evaluate operational maturity.",good
+TTX and scenario-based exercises follow structured frameworks used in industry benchmarks.,good
+Playbooks incorporate lessons learned from other industries and are periodically updated.,good
+Processes are tested against realistic benchmarks to ensure they align with high-quality industry recovery standards.,good
+"Industry guidance is used to validate that tools, processes and recovery workflows work as intended.",good
+Recovery gaps identified during exercises are addressed promptly by updating processes and playbooks.,good
+Lessons learned from past incidents are incorporated into recovery procedures regularly.,good
+Recovery communication plans are reviewed and enhanced based on observed gaps.,good
+Teams document capability gaps found during testing and implement mitigation steps.,good
+Recovery runbooks are updated after each major exercise to reflect new findings.,good
+Post-incident reviews result in targeted improvements to recovery workflows.,good
+"Capability weaknesses are logged, tracked and resolved within defined timelines.",good
+Process gaps in notification and escalation paths are corrected based on stakeholder feedback.,good
+Control gaps identified in testing are patched with updated configurations or compensating controls.,good
+Recovery procedures are aligned with findings from audits and gap assessments.,good
+"The organisation regularly updates its recovery plan to reflect new tools and evolving infrastructure. Playbooks are refined after every exercise, ensuring steps remain accurate and relevant. Stakeholders receive periodic training to maintain familiarity with updated recovery workflows.",good
+Recovery plans include updated procedures for new monitoring and backup technologies. Playbooks are refreshed quarterly to address emerging threat scenarios. Training sessions ensure teams can confidently execute revised procedures.,good
+"Processes for improving recovery plans are in place, and updates occur when major system changes happen. Playbooks incorporate lessons from recent incidents, although some training gaps remain.",good
+"Recovery documentation is maintained with moderate accuracy. When tools change, system owners make updates to playbooks, ensuring recovery steps reflect current capabilities. Annual training reinforces these updates.",good
+"The organisation adapts its recovery plan after infrastructure expansion. Playbooks are improved based on feedback from simulation exercises, though updates sometimes take longer than ideal.",good
+"Recovery workflows are clearly documented and enhanced following new technology deployments. Playbooks incorporate additional remediation paths, strengthening preparedness.",good
+"System engineers update recovery steps when integration points change. Playbooks reflect new escalation paths, and recovery training aligns with these changes.",good
+Recovery plans are reviewed following platform migrations. Improvements focus on clarifying dependencies and sequencing actions in the playbooks.,good
+"Documentation improvements occur after detection tool upgrades. Playbooks incorporate new triggers for recovery initiation, improving accuracy.",good
+"Recovery plan updates follow a semi-structured process. Playbooks evolve based on both tool changes and stakeholder recommendations, helping maintain moderate resilience maturity.",good
+"Recovery stakeholders receive scheduled training sessions every quarter. Workshops cover recovery procedures, escalation protocols, and recent updates to tools. Webinars reinforce concepts and ensure teams maintain operational familiarity.",good
+"The organisation conducts structured cyber recovery training twice a year. Topics include data restoration, communication protocols, and coordination during cyber incidents. Stakeholders show reasonable skill improvement over time.",good
+"Training programs include scenario walk-throughs and demonstrations of updated recovery tools. Stakeholders attend webinars that explain procedural changes, improving readiness.",good
+Basic training on recovery playbooks is provided regularly. Stakeholders participate in instructor-led sessions covering recovery sequencing and critical decision points.,good
+Cyber recovery education is delivered through internal seminars and refresher sessions. Stakeholders gain practical insights through simplified tabletop-style demonstrations.,good
+"The organisation provides periodic training to ensure staff understand recovery steps, isolation procedures, and fallback options. Learning materials are updated after major infrastructure changes.",good
+"Stakeholders attend recovery-focused workshops where they practice using simulated scenarios. These training sessions improve alignment across engineering, IT, and security teams.",good
+"Recovery training reinforces communication structure and escalation channels. Webinars support continuous learning, and attendance levels are consistent.",good
+"The organisation runs annual cyber recovery seminars highlighting best practices, process updates, and lessons learned from previous incidents. Skill levels remain acceptable.",good
+"Regular awareness sessions ensure that stakeholders maintain familiarity with backup, restoration, and verification procedures. Improvements are gradual but visible.",good
+"Staff receive regular training on recovery controls, including backup procedures, communication flows, and restoration steps. Training sessions focus on making employees comfortable with their responsibilities during recovery activities.",good
+"Employees participate in structured learning modules explaining recovery fundamentals. Workshops help staff understand fallback options, incident coordination, and escalation protocols.",good
+"Basic recovery training is delivered quarterly. Although not highly advanced, employees understand the essentials of recovery actions and the importance of communication discipline.",good
+Staff are educated on recovery roles through periodic seminars and internal documentation. Most are able to follow recovery guidance when needed.,good
+Training includes introductions to core recovery tools and walkthroughs of playbooks. Staff demonstrate moderate confidence during recovery simulations.,good
+"Employees participate in awareness programs explaining how human errors can impact recovery timelines. Training improves alignment between IT, support, and business teams.",good
+Recovery training materials are maintained and distributed after system updates. Staff are encouraged to review changes and ask questions.,good
+Regular refresher sessions help employees stay familiar with role-based actions in recovery processes. Attendance and participation remain consistent.,good
+Awareness programs highlight the importance of people in recovery operations. Staff show steady improvement in identifying recovery gaps.,good
+"Employees receive guided walkthroughs of recovery procedures, improving preparedness for moderate-level incidents.",good
+"Organisation maintains an active recovery call-off contract with a specialised incident-response provider. External teams support ransomware containment, forensics, and system rebuilds during major disruptions.",good
+Company uses a moderately mature service provider for cyber recovery support. Contract includes restoration assistance and selective forensic analysis.,good
+Recovery partner is engaged for backup validation and restoration testing twice a year. Staff rely on the vendor for complex recovery tasks.,good
+Organisation outsources advanced recovery tasks such as malware eradication and cloud restoration to an external specialist via a standing contract.,good
+"Vendor support is available for high-severity incident investigation and recovery, though the contract covers only limited response windows.",good
+Business maintains a contract with a regional recovery firm that provides structured post-incident system rebuilding.,good
+Recovery call-off contract covers assistance during distributed outages and data integrity failures. Vendor has moderate response maturity.,good
+Organisation procures external assistance for recovery orchestration and fallback system activation during cyber events.,good
+Recovery partner helps validate restored systems and ensures data consistency after disruptive cyber incidents.,good
+"Company has a dependable recovery contract covering containment, restoration, and post-incident reporting for medium-level cyber events.",good
