@@ -185,6 +185,7 @@ python3 app.py
 | **`OMP: Error #15: Initializing libomp.dylib…`** (macOS crash) | Two OpenMP runtimes are linked in by PyTorch and FAISS. Run with `KMP_DUPLICATE_LIB_OK=TRUE` as a stopgap, or install `faiss-cpu` and `torch` from the same channel to resolve it properly. |
 | **"Refusing to open a public link without authentication"** | `GRADIO_SHARE` is set but `GRADIO_USER`/`GRADIO_PASSWORD` are not. Set both, or unset `GRADIO_SHARE` to run locally. |
 | **"Metrics header mismatch; previous file archived as …"** | The metrics file on disk used an older column set. The old data was kept under a timestamped name and a new file started; nothing was lost. |
+| **`GoogleGenerativeAIError: API key not valid`** | `GOOGLE_API_KEY` is missing or expired. Gemini, DeepSeek, Mistral and Claude all use Gemini embeddings, so they need it even though only Gemini is a Google model. |
 | **Model config has no usable labels** | The saved model stores placeholder names (`LABEL_0`…). The app falls back to the training order `bad / good / excellent`. Re-save the model with `id2label` set to silence it. |
 
 ## 🔭 Future Improvements

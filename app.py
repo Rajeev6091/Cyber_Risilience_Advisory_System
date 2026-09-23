@@ -282,20 +282,6 @@ class EmbeddingsManager:
                 print("OpenAI embeddings initialized successfully.")
             else:
                 print("Warning: OPENAI_API_KEY is not set in your .env file.")
-            
-            # -----------------------
-            # OpenAI GPT-4 Model
-            # -----------------------
-            openai_api_key = os.getenv("OPENAI_API_KEY")
-            if openai_api_key:
-                self.models["gpt-4o"] = ChatOpenAI(
-                    model="gpt-4o",
-                    openai_api_key=openai_api_key,
-                    temperature=TemperatureLevel.MEDIUM.value[1]
-                )
-                print("GPT-4o model initialized")
-            else:
-                print("Warning: OPENAI_API_KEY not found")
 
             # Initialize Gemini embeddings
             # google_api_key = os.getenv('GOOGLE_API_KEY')
@@ -310,8 +296,11 @@ class EmbeddingsManager:
             #     print("Warning: GOOGLE_API_KEY is not set in your .env file.")
             google_api_key = os.getenv('GOOGLE_API_KEY')
             if google_api_key:
+                # `model` is required; without it construction raises and the
+                # gemini-backed models silently fall back to OpenAI embeddings.
                 self.embeddings["gemini"] = GoogleGenerativeAIEmbeddings(
-                    google_api_key=google_api_key
+                    google_api_key=google_api_key,
+                    model="models/text-embedding-004"
                     )
                 print("Gemini embeddings initialized successfully.")
             else:
