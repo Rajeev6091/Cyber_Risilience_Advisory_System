@@ -1,0 +1,15 @@
+# Tools for training, evaluation and data prep. Not needed to serve the app,
+# and deliberately excluded from deployments so the bundle stays small.
+-r requirements.txt
+
+# Fine-tuning and evaluation (llm_finetune_project/)
+peft
+scikit-learn
+matplotlib
+seaborn
+
+# PDF text extraction (scripts/create_json.py)
+pdfplumber
+
+# Publishing the fine-tuned model (scripts/upload_model_to_hf.py)
+huggingface_hub

@@ -32,10 +32,14 @@ tmp_trainer/
 *.bin
 
 # Vector stores
-vectorstore_openai/
 vectorstore_gemini/
 *.faiss
 *.pkl
+# ...except the OpenAI index (1.3 MB), committed so a deployment can load it
+# instead of re-embedding every PDF on each cold start. This negation has to
+# follow the *.faiss / *.pkl rules above to override them.
+!vectorstore_openai/
+!vectorstore_openai/**
 
 # Large data / generated outputs (kept locally, not committed)
 outputs/metrics.csv

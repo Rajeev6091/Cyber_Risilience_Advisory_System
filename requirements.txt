@@ -27,6 +27,8 @@ langchain-google-genai==1.0.10
 langchain-mistralai==0.1.12
 langchain-anthropic==0.1.23
 faiss-cpu
+# Serving the Gradio UI as an ASGI app (asgi.py) on container/serverless hosts.
+fastapi
 # Bounded: Gradio 6 moved `theme`/`css` off the Blocks constructor. The code
 # handles both majors, but an unbounded install could pick up a 7.x that does
 # not.
@@ -37,18 +39,11 @@ pypdf
 pandas
 numpy
 
-# BERT classification (used by integrated_system.py)
-torch
+# BERT classification (used by integrated_system.py).
+# The default PyPI torch wheel for Linux bundles CUDA and installs to several
+# GB. This app runs on CPU only, so take the much smaller CPU build; the +cpu
+# local version exists only on PyTorch's own index.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.12.0+cpu ; sys_platform == "linux"
+torch==2.12.0 ; sys_platform != "linux"
 transformers
-
-# Fine-tuning and evaluation (llm_finetune_project/)
-peft
-scikit-learn
-matplotlib
-seaborn
-
-# PDF text extraction (scripts/create_json.py)
-pdfplumber
-
-# Publishing the fine-tuned model (scripts/upload_model_to_hf.py)
-huggingface_hub

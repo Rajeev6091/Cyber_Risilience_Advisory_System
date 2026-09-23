@@ -1,6 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "git": {
-    "deploymentEnabled": false
+  "functions": {
+    "asgi.py": {
+      "memory": 2048,
+      "maxDuration": 300,
+      "excludeFiles": "{llm_finetune_project/**,scripts/**,metrics_log/**,outputs/**,venv/**,**/__pycache__/**,*.md,.gradio/**}"
+    }
   }
 }

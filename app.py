@@ -30,7 +30,14 @@ load_dotenv()
 # Project root = directory containing this file. All paths are derived from it
 # so the app runs regardless of where the repo is cloned.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
+
+# Serverless hosts mount the deployment read-only and give /tmp as the only
+# writable location. Anything this app creates at runtime therefore has to be
+# redirectable; on a normal machine these stay inside the project.
+WRITABLE_DIR = os.getenv("APP_WRITABLE_DIR") or (
+    "/tmp" if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME") else BASE_DIR)
+
+OUTPUT_DIR = os.path.join(WRITABLE_DIR, "outputs")
 
 # Gradio 6 moved `theme` and `css` off the Blocks constructor onto launch().
 GRADIO_MAJOR = int(gr.__version__.split(".")[0])
@@ -64,6 +71,13 @@ def launch_app(demo, **kwargs):
 
     # Styling the Blocks constructor could not accept on this Gradio version.
     kwargs.update(getattr(demo, "launch_style", {}))
+
+    # Container hosts (Cloud Run, Render, Fly, Railway) hand the port in $PORT
+    # and expect the process to listen on every interface, not just loopback.
+    port = os.getenv("PORT")
+    if port:
+        kwargs.setdefault("server_name", "0.0.0.0")
+        kwargs.setdefault("server_port", int(port))
 
     if on_spaces:
         print(f"Launching on Hugging Face Spaces ({os.getenv('SPACE_ID', 'unknown space')})"
@@ -226,7 +240,10 @@ class TemperatureLevel(Enum):
 
 class Config:
     PDF_DIRECTORY = os.path.join(BASE_DIR, "pdfs")
+    # Read from the deployment if an index was shipped with it, otherwise build
+    # into the writable location.
     VECTOR_STORE_PATH = os.path.join(BASE_DIR, "vectorstore")
+    VECTOR_STORE_WRITE_PATH = os.path.join(WRITABLE_DIR, "vectorstore")
     CHUNK_SIZE = 500
     CHUNK_OVERLAP = 100
     METRICS_FILE = os.path.join(OUTPUT_DIR, "metrics.csv")
@@ -335,13 +352,31 @@ class EmbeddingsManager:
         return embedding_model.embed_query(text)
 
 class VectorStoreManager:
-    def __init__(self, store_path: str, embeddings_manager: EmbeddingsManager):
+    def __init__(self, store_path: str, embeddings_manager: EmbeddingsManager,
+                 write_path: Optional[str] = None):
         self.store_path = store_path
+        # Where a newly built index is saved. On a read-only deployment this is
+        # not the same place an index shipped with the bundle is read from.
+        self.write_path = write_path or store_path
         self.embeddings_manager = embeddings_manager
         self.vector_stores: Dict[str, FAISS] = {}
 
     def get_vector_store_path(self, embedding_type: str) -> str:
         return f"{self.store_path}_{embedding_type}"
+
+    def get_vector_store_write_path(self, embedding_type: str) -> str:
+        return f"{self.write_path}_{embedding_type}"
+
+    def _save(self, vector_store, embedding_type: str) -> None:
+        """Persist a freshly built index, tolerating a read-only filesystem."""
+        path = self.get_vector_store_write_path(embedding_type)
+        try:
+            vector_store.save_local(path)
+            print(f"Vector store saved to {path}")
+        except OSError as e:
+            # Not fatal: the index is already in memory and usable for this
+            # instance. It just has to be rebuilt next cold start.
+            print(f"Could not save vector store to {path}: {e}")
 
     def create_or_load_vector_store(self, documents: List[Document], embedding_type: str) -> Optional[FAISS]:
         try:
@@ -351,7 +386,13 @@ class VectorStoreManager:
             
             store_path = self.get_vector_store_path(embedding_type)
             embeddings = self.embeddings_manager.get_embedding(embedding_type)
-            
+
+            # An index built on a previous run lands in the writable location;
+            # prefer it, then fall back to one shipped with the deployment.
+            write_path = self.get_vector_store_write_path(embedding_type)
+            if os.path.exists(write_path):
+                store_path = write_path
+
             if os.path.exists(store_path):
                 try:
                     print(f"Loading existing {embedding_type} vector store...")
@@ -367,12 +408,11 @@ class VectorStoreManager:
                 except Exception as e:
                     print(f"Error loading {embedding_type} vector store: {e}. Recreating vector store...")
                     vector_store = self._create_vector_store(documents, embeddings)
-                    vector_store.save_local(store_path)
-                    print(f"New {embedding_type} vector store created and saved successfully.")
+                    self._save(vector_store, embedding_type)
             else:
                 print(f"Creating new {embedding_type} vector store...")
                 vector_store = self._create_vector_store(documents, embeddings)
-                vector_store.save_local(store_path)
+                self._save(vector_store, embedding_type)
                 print(f"New {embedding_type} vector store created and saved successfully.")
             
             self.vector_stores[embedding_type] = vector_store
@@ -602,7 +642,9 @@ class RAGApplication:
     def __init__(self):
         self.doc_processor = DocumentProcessor(Config.PDF_DIRECTORY)
         self.embeddings_manager = EmbeddingsManager()
-        self.vector_store_manager = VectorStoreManager(Config.VECTOR_STORE_PATH, self.embeddings_manager)
+        self.vector_store_manager = VectorStoreManager(
+            Config.VECTOR_STORE_PATH, self.embeddings_manager,
+            write_path=Config.VECTOR_STORE_WRITE_PATH)
         self.llm_manager = LLMManager()
         self.documents = self.doc_processor.load_and_split_documents()
         self.metrics_tracker = MetricsTracker(Config.METRICS_FILE)
