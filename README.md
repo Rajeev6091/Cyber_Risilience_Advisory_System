@@ -1,3 +1,16 @@
+---
+title: Cyber Resilience Assessment
+emoji: 🛡️
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: 6.16.0
+python_version: "3.12"
+app_file: integrated_system.py
+pinned: false
+short_description: RAG + BERT cybersecurity resilience assessment (Bad/Good/Excellent)
+---
+
 # 🧠 Integrated Cybersecurity Assessment System
 
 A system combining **RAG** (Retrieval-Augmented Generation) and **BERT-based classification**
@@ -157,6 +170,54 @@ The RAG-only system can also be run on its own:
 ```bash
 python3 app.py
 ```
+
+## ☁️ Deploying to Hugging Face Spaces
+
+This repo is configured as a Gradio Space — the YAML block at the top of this file
+is the Space config. The app runs unchanged; only the model and the secrets need
+arranging, because neither can live in git.
+
+### 1. Publish the BERT model to the Hub
+
+`llm_finetune_project/bert-mini-finetuned/` is git-ignored (47 MB of binaries), so
+it is not in this repository and a Space cannot see it. Push it to a Hub model repo:
+
+```bash
+export HF_TOKEN=hf_...                                  # a write token
+python3 scripts/upload_model_to_hf.py <your-username>/bert-mini-cyber
+```
+
+### 2. Create the Space and push
+
+```bash
+# Create a Gradio Space at https://huggingface.co/new-space, then:
+git remote add space https://huggingface.co/spaces/<your-username>/<space-name>
+git push space main
+```
+
+### 3. Set the Space variables and secrets
+
+In **Settings → Variables and secrets**:
+
+| Name | Kind | Value |
+|------|------|-------|
+| `BERT_MODEL_PATH` | Variable | the model repo id from step 1 |
+| `OPENAI_API_KEY`  | Secret   | required for GPT-4 and OpenAI embeddings |
+| `GOOGLE_API_KEY`  | Secret   | required for Gemini, DeepSeek, Mistral and Claude |
+| `DEEPSEEK_API_KEY` / `MISTRAL_API_KEY` / `ANTHROPIC_API_KEY` | Secret | per model, optional |
+
+Secrets, not variables, for anything key-shaped: variables are visible to anyone
+who can view the Space.
+
+### What to expect
+
+- The Space serves its own public URL, so no share tunnel is used. Set
+  `GRADIO_USER` and `GRADIO_PASSWORD` if you want the UI password-protected.
+- Spaces have **no persistent storage**. The FAISS index is rebuilt from `pdfs/`
+  on each restart — a few seconds and a few embedding calls — and the metrics in
+  `outputs/` reset with it. Treat the CSVs as per-session, not as a record.
+- `cpu-basic` (free) is enough: bert-mini is tiny and the LLM work happens in the
+  providers' APIs.
 
 ## 🚀 Features
 

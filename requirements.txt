@@ -49,3 +49,6 @@ seaborn
 
 # PDF text extraction (scripts/create_json.py)
 pdfplumber
+
+# Publishing the fine-tuned model (scripts/upload_model_to_hf.py)
+huggingface_hub

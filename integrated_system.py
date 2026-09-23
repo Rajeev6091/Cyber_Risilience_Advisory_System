@@ -49,9 +49,12 @@ class IntegratedCyberSecuritySystem:
                                         os.path.join(BASE_DIR, "llm_finetune_project", "bert-mini-finetuned"))
         self.bert_tokenizer_name = "prajjwal1/bert-mini"
 
-        print("MODEL PATH:", self.bert_model_path)
-        print("PATH EXISTS:", os.path.exists(self.bert_model_path))
-        print("FILES:", os.listdir(self.bert_model_path) if os.path.exists(self.bert_model_path) else "No folder")
+        # BERT_MODEL_PATH may be a local directory or a Hugging Face Hub id
+        # (e.g. "your-name/bert-mini-cyber"); from_pretrained() accepts both.
+        if os.path.isdir(self.bert_model_path):
+            print(f"BERT model: local directory {self.bert_model_path}")
+        else:
+            print(f"BERT model: resolving '{self.bert_model_path}' from the Hugging Face Hub")
         
         # Load BERT model and tokenizer
         try:

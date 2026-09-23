@@ -45,7 +45,12 @@ def launch_app(demo, **kwargs):
 
         GRADIO_SHARE=1 GRADIO_USER=me GRADIO_PASSWORD=secret python3 app.py
     """
-    share = os.getenv("GRADIO_SHARE", "").strip().lower() in ("1", "true", "yes", "on")
+    # Hugging Face Spaces already serves the app on its own public URL and sets
+    # GRADIO_SERVER_NAME itself, so a share tunnel there is pointless.
+    on_spaces = os.getenv("SYSTEM") == "spaces" or bool(os.getenv("SPACE_ID"))
+
+    share = (not on_spaces) and os.getenv("GRADIO_SHARE", "").strip().lower() in (
+        "1", "true", "yes", "on")
     user = os.getenv("GRADIO_USER")
     password = os.getenv("GRADIO_PASSWORD")
     auth = (user, password) if user and password else None
@@ -60,7 +65,10 @@ def launch_app(demo, **kwargs):
     # Styling the Blocks constructor could not accept on this Gradio version.
     kwargs.update(getattr(demo, "launch_style", {}))
 
-    if share:
+    if on_spaces:
+        print(f"Launching on Hugging Face Spaces ({os.getenv('SPACE_ID', 'unknown space')})"
+              + (" with authentication." if auth else "."))
+    elif share:
         print("Launching with a PUBLIC share link (authentication enabled).")
     else:
         print("Launching locally on http://127.0.0.1:7860 "
