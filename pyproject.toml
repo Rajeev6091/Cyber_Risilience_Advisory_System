@@ -1,4 +1,0 @@
-# Vercel picks a Python entrypoint by filename and finds app.py first, which is
-# the RAG module and exports no ASGI app. Point it at the real one.
-[tool.vercel]
-entrypoint = "asgi:app"

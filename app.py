@@ -1020,6 +1020,39 @@ def create_gradio_interface(rag_app: RAGApplication):
     
     return demo
 
+class _LazyASGIApp:
+    """ASGI entrypoint that builds the UI on startup rather than at import.
+
+    Vercel picks a Python entrypoint by filename, finds app.py first, and
+    requires a top-level `app`. Building the interface here at import time
+    would mean importing integrated_system, which imports this module back —
+    so construction is deferred until the server actually starts us.
+    """
+
+    def __init__(self):
+        self._app = None
+
+    def _build(self):
+        import gradio as gr
+        from fastapi import FastAPI
+        from integrated_system import (
+            IntegratedCyberSecuritySystem, create_gradio_interface)
+
+        system = IntegratedCyberSecuritySystem()
+        demo = create_gradio_interface(system)
+        return gr.mount_gradio_app(FastAPI(), demo, path="/")
+
+    async def __call__(self, scope, receive, send):
+        if self._app is None:
+            self._app = self._build()
+        await self._app(scope, receive, send)
+
+
+# Served by ASGI hosts (Vercel, uvicorn, Cloud Run). Running this file directly
+# still starts Gradio's own server instead.
+app = _LazyASGIApp()
+
+
 if __name__ == "__main__":
     rag_app = RAGApplication()
     demo = create_gradio_interface(rag_app)
