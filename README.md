@@ -1,16 +1,3 @@
----
-title: Cyber Resilience Assessment
-emoji: 🛡️
-colorFrom: blue
-colorTo: indigo
-sdk: gradio
-sdk_version: 6.16.0
-python_version: "3.12"
-app_file: integrated_system.py
-pinned: false
-short_description: RAG + BERT cybersecurity resilience assessment (Bad/Good/Excellent)
----
-
 # 🧠 Integrated Cybersecurity Assessment System
 
 A system combining **RAG** (Retrieval-Augmented Generation) and **BERT-based classification**
@@ -171,53 +158,44 @@ The RAG-only system can also be run on its own:
 python3 app.py
 ```
 
-## ☁️ Deploying to Hugging Face Spaces
+## ☁️ Deploying
 
-This repo is configured as a Gradio Space — the YAML block at the top of this file
-is the Space config. The app runs unchanged; only the model and the secrets need
-arranging, because neither can live in git.
+The app is deployed as an ASGI application: `app.py` exports a top-level `app`
+that mounts the Gradio UI on FastAPI, so any ASGI host can serve it
+(`uvicorn app:app`). Running `integrated_system.py` directly still starts
+Gradio's own server and is the way to work locally.
 
-### 1. Publish the BERT model to the Hub
+### Publish the BERT model
 
-`llm_finetune_project/bert-mini-finetuned/` is git-ignored (47 MB of binaries), so
-it is not in this repository and a Space cannot see it. Push it to a Hub model repo:
+`llm_finetune_project/bert-mini-finetuned/` is git-ignored (47 MB of binaries),
+so it is not in this repository and no deployment can see it. Push it to a
+Hugging Face model repo and point `BERT_MODEL_PATH` at the id:
 
 ```bash
 export HF_TOKEN=hf_...                                  # a write token
 python3 scripts/upload_model_to_hf.py <your-username>/bert-mini-cyber
 ```
 
-### 2. Create the Space and push
+### Environment
 
-```bash
-# Create a Gradio Space at https://huggingface.co/new-space, then:
-git remote add space https://huggingface.co/spaces/<your-username>/<space-name>
-git push space main
-```
+| Variable | Purpose |
+|----------|---------|
+| `BERT_MODEL_PATH`  | The model repo id from above. Without it there is no classifier. |
+| `HF_TOKEN`         | Needed only if that model repo is private. |
+| `HF_HOME`          | Set to `/tmp` where the deployment filesystem is read-only. |
+| `OPENAI_API_KEY`   | GPT-4 and the OpenAI embeddings. |
+| `GOOGLE_API_KEY`   | Gemini, DeepSeek, Mistral and Claude (all use Gemini embeddings). |
+| `APP_WRITABLE_DIR` | Overrides where runtime output goes. Defaults to `/tmp` on serverless. |
 
-### 3. Set the Space variables and secrets
+### Notes
 
-In **Settings → Variables and secrets**:
-
-| Name | Kind | Value |
-|------|------|-------|
-| `BERT_MODEL_PATH` | Variable | the model repo id from step 1 |
-| `OPENAI_API_KEY`  | Secret   | required for GPT-4 and OpenAI embeddings |
-| `GOOGLE_API_KEY`  | Secret   | required for Gemini, DeepSeek, Mistral and Claude |
-| `DEEPSEEK_API_KEY` / `MISTRAL_API_KEY` / `ANTHROPIC_API_KEY` | Secret | per model, optional |
-
-Secrets, not variables, for anything key-shaped: variables are visible to anyone
-who can view the Space.
-
-### What to expect
-
-- The Space serves its own public URL, so no share tunnel is used. Set
-  `GRADIO_USER` and `GRADIO_PASSWORD` if you want the UI password-protected.
-- Spaces have **no persistent storage**. The FAISS index is rebuilt from `pdfs/`
-  on each restart — a few seconds and a few embedding calls — and the metrics in
-  `outputs/` reset with it. Treat the CSVs as per-session, not as a record.
-- `cpu-basic` (free) is enough: bert-mini is tiny and the LLM work happens in the
-  providers' APIs.
+- Runtime writes (metrics, a rebuilt index) go to `WRITABLE_DIR`, which is
+  `/tmp` on a read-only host. Treat those files as per-instance, not as a record.
+- The OpenAI FAISS index is committed, so a cold start loads it instead of
+  re-embedding every PDF. The PDFs are only parsed if an index has to be built.
+- Serverless functions are sized in the hundreds of MB by default; this app's
+  dependencies come to roughly 1.3 GB, so a larger-bundle option has to be
+  enabled on such hosts.
 
 ## 🚀 Features
 
