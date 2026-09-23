@@ -378,7 +378,7 @@ class VectorStoreManager:
             # instance. It just has to be rebuilt next cold start.
             print(f"Could not save vector store to {path}: {e}")
 
-    def create_or_load_vector_store(self, documents: List[Document], embedding_type: str) -> Optional[FAISS]:
+    def create_or_load_vector_store(self, load_documents, embedding_type: str) -> Optional[FAISS]:
         try:
             # Check if we already have this vector store in memory
             if embedding_type in self.vector_stores:
@@ -407,11 +407,11 @@ class VectorStoreManager:
                     print(f"Existing {embedding_type} vector store loaded successfully.")
                 except Exception as e:
                     print(f"Error loading {embedding_type} vector store: {e}. Recreating vector store...")
-                    vector_store = self._create_vector_store(documents, embeddings)
+                    vector_store = self._create_vector_store(load_documents(), embeddings)
                     self._save(vector_store, embedding_type)
             else:
                 print(f"Creating new {embedding_type} vector store...")
-                vector_store = self._create_vector_store(documents, embeddings)
+                vector_store = self._create_vector_store(load_documents(), embeddings)
                 self._save(vector_store, embedding_type)
                 print(f"New {embedding_type} vector store created and saved successfully.")
             
@@ -646,11 +646,20 @@ class RAGApplication:
             Config.VECTOR_STORE_PATH, self.embeddings_manager,
             write_path=Config.VECTOR_STORE_WRITE_PATH)
         self.llm_manager = LLMManager()
-        self.documents = self.doc_processor.load_and_split_documents()
+        # Parsing the PDFs is only needed to BUILD an index. When one is
+        # already on disk it is dead weight on every cold start, so defer it.
+        self._documents = None
         self.metrics_tracker = MetricsTracker(Config.METRICS_FILE)
         self.metrics_calculator = MetricsCalculator()
         self.query_counter = 0
-        print(f"System initialized with {len(self.documents)} document chunks")
+        print("System initialized (documents load on demand)")
+
+    @property
+    def documents(self) -> List[Document]:
+        """Source chunks, parsed from the PDFs the first time they are needed."""
+        if self._documents is None:
+            self._documents = self.doc_processor.load_and_split_documents()
+        return self._documents
     
     def get_model_info(self, model_name: str) -> Dict[str, Any]:
         model_info = Config.get_model_config().get(model_name, {})
@@ -744,7 +753,8 @@ class RAGApplication:
             
             # Try to get the vector store
             try:
-                vector_store = self.vector_store_manager.create_or_load_vector_store(self.documents, embedding_type)
+                vector_store = self.vector_store_manager.create_or_load_vector_store(
+                    lambda: self.documents, embedding_type)
                 if vector_store is None:
                     return "Vector store not initialized. Please check logs for errors."
             except ValueError as e:
