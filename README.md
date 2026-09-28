@@ -176,12 +176,20 @@ export HF_TOKEN=hf_...                                  # a write token
 python3 scripts/upload_model_to_hf.py <your-username>/bert-mini-cyber
 ```
 
+The script creates the repo private. Make it public if you would rather not
+give the deployment a token:
+
+```python
+from huggingface_hub import HfApi
+HfApi().update_repo_settings("<your-username>/bert-mini-cyber", private=False)
+```
+
 ### Environment
 
 | Variable | Purpose |
 |----------|---------|
 | `BERT_MODEL_PATH`  | The model repo id from above. Without it there is no classifier. |
-| `HF_TOKEN`         | Needed only if that model repo is private. |
+| `HF_TOKEN`         | Only if that model repo is private. A public one needs no token. |
 | `HF_HOME`          | Set to `/tmp` where the deployment filesystem is read-only. |
 | `OPENAI_API_KEY`   | GPT-4 and the OpenAI embeddings. |
 | `GOOGLE_API_KEY`   | Gemini, DeepSeek, Mistral and Claude (all use Gemini embeddings). |
