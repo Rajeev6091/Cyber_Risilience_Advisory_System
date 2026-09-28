@@ -1,0 +1,15 @@
+venv/
+.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.git/
+.env
+.env.*
+!.env.example
+llm_finetune_project/
+scripts/
+metrics_log/
+outputs/
+.gradio/
+*.md
