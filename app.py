@@ -1059,7 +1059,11 @@ class _LazyASGIApp:
 
         system = IntegratedCyberSecuritySystem()
         demo = create_gradio_interface(system)
-        return gr.mount_gradio_app(FastAPI(), demo, path="/")
+        # Gradio 6 ignores theme/css given to the Blocks constructor; they are
+        # accepted by launch() and, for a mounted app, by mount_gradio_app.
+        # Without this the deployment serves an unstyled UI.
+        return gr.mount_gradio_app(FastAPI(), demo, path="/",
+                                   **getattr(demo, "launch_style", {}))
 
     async def __call__(self, scope, receive, send):
         if self._app is None:
