@@ -175,9 +175,16 @@ class MetricsTracker:
         # Each tracker owns the exact column set it writes, so rows can never be
         # appended against a header belonging to a different schema.
         self.fields = list(fields) if fields else list(RAG_METRIC_FIELDS)
-        # Make sure the output directory exists before writing
-        os.makedirs(os.path.dirname(os.path.abspath(metrics_file)), exist_ok=True)
-        self._ensure_header()
+        # Metrics are diagnostics. If the destination cannot be written -- a
+        # read-only deployment, a bad override -- record nothing and carry on
+        # rather than taking down the application that produces them.
+        self.enabled = True
+        try:
+            os.makedirs(os.path.dirname(os.path.abspath(metrics_file)), exist_ok=True)
+            self._ensure_header()
+        except OSError as e:
+            self.enabled = False
+            print(f"Metrics disabled, cannot write {metrics_file}: {e}")
 
     def _ensure_header(self):
         """Create the file, or set aside one whose header is a different schema."""
@@ -201,6 +208,8 @@ class MetricsTracker:
 
     def log_metrics(self, metrics_data: Dict[str, Any]):
         """Log metrics to CSV file with validation"""
+        if not self.enabled:
+            return False
         try:
             row = {}
             for field in self.fields:

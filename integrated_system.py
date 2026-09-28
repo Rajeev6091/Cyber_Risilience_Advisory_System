@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 # Import components from your existing files
 from app import (
     Config, RAGApplication, MetricsTracker, TemperatureLevel,
-    HYBRID_METRIC_FIELDS, GRADIO_MAJOR, launch_app
+    HYBRID_METRIC_FIELDS, GRADIO_MAJOR, launch_app, OUTPUT_DIR
 )
 # from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -24,7 +24,9 @@ load_dotenv()
 # Project root = directory containing this file. Paths are derived from it so
 # the system runs regardless of where the repo is cloned.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
+# OUTPUT_DIR is imported from app: defining a second copy here meant this module
+# kept writing into the deployment directory, which is read-only on serverless
+# hosts, and the resulting PermissionError killed the app at startup.
 
 # Verdict used when the RAG response contains no readable classification.
 UNKNOWN_PROFILE = "unknown"
