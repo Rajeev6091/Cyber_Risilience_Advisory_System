@@ -12,6 +12,12 @@ SERVICE="${SERVICE:-cras}"
 REGION="${REGION:-us-central1}"          # free tier applies in select US regions
 MEMORY="${MEMORY:-1Gi}"                  # measured peak is ~543 MB
 
+# Gradio holds queue state in memory: a job is registered by one request and
+# its result collected by a later one. If those land on different instances the
+# second gets "404: Not Found" and the UI spins forever, which is what happens
+# on platforms that spread requests freely. Session affinity plus a ceiling of
+# one instance keeps a client talking to the process that holds its job.
+
 PROJECT="$(gcloud config get-value project 2>/dev/null)"
 [ -n "$PROJECT" ] && [ "$PROJECT" != "(unset)" ] || {
   echo "No project set. Run: gcloud config set project <project-id>" >&2; exit 1; }
@@ -37,7 +43,8 @@ gcloud run deploy "$SERVICE" \
   --cpu 1 \
   --timeout 300 \
   --min-instances 0 \
-  --max-instances 3 \
+  --max-instances 1 \
+  --session-affinity \
   --allow-unauthenticated \
   --set-env-vars "$ENV_VARS"
 
